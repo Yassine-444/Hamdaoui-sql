@@ -1,0 +1,50 @@
+
+DROP DATABASE IF EXISTS educore;
+
+CREATE DATABASE educore
+CHARACTER SET utf8mb4
+COLLATE utf8mb4_unicode_ci;
+
+USE educore;
+
+CREATE TABLE users (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  email VARCHAR(150) NOT NULL UNIQUE,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE courses (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  title VARCHAR(150) NOT NULL,
+  price DECIMAL(10,2) NOT NULL,
+  CHECK (price > 0)
+);
+
+CREATE TABLE enrollments (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  course_id INT NOT NULL,
+  progress TINYINT DEFAULT 0,
+  enrolled_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  CHECK (progress BETWEEN 0 AND 100),
+  CONSTRAINT fk_enroll_user FOREIGN KEY (user_id)
+    REFERENCES users(id)
+    ON DELETE CASCADE,
+  CONSTRAINT fk_enroll_course FOREIGN KEY (course_id)
+    REFERENCES courses(id)
+    ON DELETE CASCADE,
+  CONSTRAINT uq_enroll UNIQUE (user_id, course_id)
+);
+
+CREATE TABLE payments (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  amount DECIMAL(10,2) NOT NULL,
+  status ENUM('SUCCEEDED','FAILED','PENDING') DEFAULT 'SUCCEEDED',
+  paid_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  CHECK (amount > 0),
+  CONSTRAINT fk_payment_user FOREIGN KEY (user_id)
+    REFERENCES users(id)
+    ON DELETE CASCADE
+);
